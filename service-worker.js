@@ -1,7 +1,7 @@
 // Dopamine Box — service worker
 // Bump CACHE_VERSION whenever index.html (or other cached assets) change,
 // so returning users pick up the new version instead of a stale cache.
-const CACHE_VERSION = 'dopamine-box-v1';
+const CACHE_VERSION = 'dopamine-box-v2';
 
 const APP_SHELL = [
   './',
@@ -64,6 +64,41 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => cached);
       return cached || fetchPromise;
+    })
+  );
+});
+
+// ---- Push notifications (daily reminder) ----
+self.addEventListener('push', (event) => {
+  let data = {};
+  try{
+    data = event.data ? event.data.json() : {};
+  }catch(e){
+    data = { title: 'Dopamine Box', body: event.data ? event.data.text() : "Today's tasks are waiting." };
+  }
+
+  const title = data.title || 'Dopamine Box';
+  const options = {
+    body: data.body || "You've still got tasks waiting today.",
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
+    tag: 'dopamine-box-daily-reminder',
+    renotify: true,
+    data: { url: data.url || './' },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
 });

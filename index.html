@@ -38,7 +38,14 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  html,body{
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  html{
+    background: #08070D;
+  }
   body{
     margin:0;
     background:
@@ -46,8 +53,9 @@
       linear-gradient(180deg, var(--bg-0), #08070D 100%);
     color:var(--ink);
     font-family:var(--font-body);
-    min-height:100vh;
-    overflow-x:hidden;
+    position:fixed;
+    inset:0;
+    overscroll-behavior:none;
   }
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
@@ -59,7 +67,10 @@
   #app{
     max-width:480px;
     margin:0 auto;
-    min-height:100vh;
+    height:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
     padding-top:calc(var(--safe-top) + 18px);
     padding-bottom:calc(var(--safe-bottom) + 96px);
     position:relative;
@@ -86,7 +97,9 @@
   }
   .icon-btn:active{ transform:scale(0.92); }
 
-  .streakrow{ display:flex; gap:10px; margin-bottom:18px; }
+  .streakrow{ display:flex; gap:10px; margin-bottom:12px; }
+  .streak-note{ font-size:12.5px; color:var(--ink-faint); text-align:center; padding:0 6px; line-height:1.5; }
+  .streak-note b{ color:var(--mint); font-weight:600; }
   .stat-chip{
     flex:1; background:var(--bg-card); border:1px solid var(--line); border-radius:20px;
     padding:14px 14px; position:relative; overflow:hidden;
@@ -118,6 +131,16 @@
   .meter-pct{ text-align:right; font-family:var(--font-display); font-size:12px; color:var(--ink-faint); margin-top:7px;}
 
   /* ---------- Section label ---------- */
+  .grace-banner{
+    margin:0 20px 6px; padding:12px 15px; border-radius:16px;
+    background:rgba(63,239,194,.10); border:1px solid rgba(63,239,194,.32);
+    color:var(--mint); font-size:12.5px; font-weight:600; line-height:1.4;
+    display:flex; align-items:flex-start; gap:9px;
+    animation:banner-in .4s cubic-bezier(.22,1,.36,1) both;
+  }
+  .grace-icon{ font-size:15px; flex-shrink:0; line-height:1.3; }
+  @keyframes banner-in{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+
   .section-label{ padding:22px 20px 10px; font-size:12.5px; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; display:flex; justify-content:space-between; align-items:center;}
   .section-label .add-btn{ color:var(--coral); font-weight:700; font-size:13px; background:none; border:none; cursor:pointer; }
 
@@ -130,24 +153,25 @@
     border-radius:var(--radius-card);
     padding:18px 18px 16px;
     display:flex; align-items:center; gap:14px;
-    transition:transform .18s ease, opacity .4s ease, background .3s;
+    transition:transform .18s ease, opacity .28s ease, background .28s ease;
   }
   .task-card:active{ transform:scale(0.985); }
   .task-emoji{
     width:50px; height:50px; border-radius:16px; background:var(--bg-1);
     display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;
     border:1px solid var(--line);
+    transition:background .28s ease, border-color .28s ease;
   }
   .task-body{ flex:1; min-width:0; }
-  .task-name{ font-size:15.5px; font-weight:600; color:var(--ink); }
-  .task-xp{ font-family:var(--font-display); font-size:12px; color:var(--gold); margin-top:3px; font-weight:600;}
+  .task-name{ font-size:15.5px; font-weight:600; color:var(--ink); transition:color .28s ease; }
+  .task-sub{ font-family:var(--font-display); font-size:12px; color:var(--mint); margin-top:3px; font-weight:600;}
   .complete-btn{
     flex-shrink:0; border:none; cursor:pointer;
     width:54px; height:54px; border-radius:18px;
     background:linear-gradient(155deg, var(--coral), #E14D3A);
     box-shadow:0 6px 0 var(--coral-dim), 0 10px 18px -6px rgba(255,107,87,.5);
     display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px;
-    transition:transform .08s ease, box-shadow .08s ease;
+    transition:transform .08s ease, box-shadow .08s ease, background .28s ease, color .28s ease;
   }
   .complete-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 var(--coral-dim), 0 2px 6px -2px rgba(255,107,87,.5); }
 
@@ -161,10 +185,22 @@
     background:var(--bg-2); box-shadow:none; color:var(--mint);
   }
   .task-card.editrow{ padding:12px 14px; }
+  @keyframes card-in{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .task-card.entrance{ animation:card-in .38s cubic-bezier(.22,1,.36,1) both; }
   .task-manage-btns{ display:flex; gap:6px; flex-shrink:0; }
   .mini-btn{ width:30px;height:30px;border-radius:9px;border:1px solid var(--line); background:var(--bg-1); color:var(--ink-dim); font-size:13px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
   .mini-btn.danger{ color:var(--danger); border-color:rgba(255,92,122,.35); background:rgba(255,92,122,.08); }
   .mini-btn.danger:active{ transform:scale(0.9); }
+  .drag-handle{
+    width:28px; height:44px; flex-shrink:0; border:none; background:none; color:var(--ink-faint);
+    font-size:17px; display:flex; align-items:center; justify-content:center; cursor:grab;
+    touch-action:none; margin-left:-6px; letter-spacing:-1px;
+  }
+  .drag-handle:active{ cursor:grabbing; color:var(--ink); }
+  .drag-ghost{
+    position:fixed; z-index:200; pointer-events:none;
+    opacity:.97;
+  }
 
   .burst{ position:absolute; inset:0; pointer-events:none; }
 
@@ -311,26 +347,11 @@
         <div class="brand">Dopamine Box<small>DAILY TASK LOOP</small></div>
         <button class="icon-btn" id="btn-settings">⚙</button>
       </div>
+    </div>
 
-      <div class="streakrow">
-        <div class="stat-chip flame">
-          <div class="row"><span class="emoji">🔥</span><span class="num" id="streak-num">0</span></div>
-          <div class="label">DAY STREAK</div>
-        </div>
-        <div class="stat-chip perfect">
-          <div class="row"><span class="emoji">✨</span><span class="num" id="perfect-num">0</span></div>
-          <div class="label">PERFECT DAYS</div>
-        </div>
-      </div>
-
-      <div class="meter-block">
-        <div class="meter-head">
-          <div class="meter-title">TODAY'S DOPAMINE</div>
-          <div class="meter-frac" id="progress-frac">0 / 0</div>
-        </div>
-        <div class="meter-track"><div class="meter-fill" id="meter-fill"></div></div>
-        <div class="meter-pct" id="meter-pct">0%</div>
-      </div>
+    <div class="grace-banner hidden" id="grace-banner">
+      <span class="grace-icon">❄️</span>
+      <span>Grace day used this week. Don't miss today, no more forgiveness left.</span>
     </div>
 
     <div class="section-label">
@@ -347,6 +368,18 @@
       <div class="hero-top">
         <div class="brand">Statistics<small>YOUR HISTORY</small></div>
       </div>
+
+      <div class="streakrow">
+        <div class="stat-chip flame">
+          <div class="row"><span class="emoji">🔥</span><span class="num" id="streak-num">0</span></div>
+          <div class="label">DAY STREAK</div>
+        </div>
+        <div class="stat-chip perfect">
+          <div class="row"><span class="emoji">✨</span><span class="num" id="perfect-num">0</span></div>
+          <div class="label">PERFECT DAYS</div>
+        </div>
+      </div>
+      <div class="streak-note" id="streak-note"></div>
     </div>
     <div class="stats-grid" id="stats-grid"></div>
     <div style="height:20px"></div>
@@ -389,10 +422,6 @@
       <label>Icon</label>
       <div class="emoji-row" id="emoji-row"></div>
     </div>
-    <div class="field">
-      <label>XP reward</label>
-      <input type="number" id="input-task-xp" value="10" min="1" max="100">
-    </div>
     <div class="toggle-row">
       <div><div class="t">Repeat daily</div><div class="d">Appears every day until you remove it</div></div>
       <div class="switch on" id="toggle-recurring"><div class="knob"></div></div>
@@ -420,6 +449,26 @@
       <div class="pack-list" id="pack-list"></div>
     </div>
     <button class="ghost-btn" id="btn-preview-sound">▶ Preview sound</button>
+
+    <div class="field" style="margin-top:22px;">
+      <label>Daily reminder</label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="t">Push notification</div><div class="d" id="reminder-status">Get nudged if today isn't done yet</div></div>
+      <div class="switch" id="toggle-reminder"><div class="knob"></div></div>
+    </div>
+    <div id="reminder-config" class="hidden">
+      <div class="field" style="margin-top:14px;">
+        <label>Remind me at</label>
+        <input type="text" id="input-reminder-time" placeholder="19:00" value="19:00" maxlength="5">
+      </div>
+      <div class="field">
+        <label>Notification server URL</label>
+        <input type="text" id="input-server-url" placeholder="https://your-server.example.com">
+      </div>
+      <button class="ghost-btn" id="btn-save-reminder" style="margin-top:0;">Save reminder</button>
+    </div>
+
     <button class="ghost-btn danger-btn" id="btn-reset-data">Reset all data</button>
   </div>
 </div>
@@ -444,11 +493,11 @@
 
   /* ============================= STATE ============================= */
   const DEFAULT_TASKS = [
-    {id:'t1', name:'Make the bed', emoji:'🛏️', xp:10, recurring:true, order:0},
-    {id:'t2', name:'Do the dishes', emoji:'🍽️', xp:10, recurring:true, order:1},
-    {id:'t3', name:'Tidy bedroom', emoji:'🧹', xp:15, recurring:true, order:2},
-    {id:'t4', name:'Take the bins out', emoji:'🗑️', xp:10, recurring:true, order:3},
-    {id:'t5', name:'Shower', emoji:'🚿', xp:10, recurring:true, order:4},
+    {id:'t1', name:'Make the bed', emoji:'🛏️', recurring:true, order:0},
+    {id:'t2', name:'Do the dishes', emoji:'🍽️', recurring:true, order:1},
+    {id:'t3', name:'Tidy bedroom', emoji:'🧹', recurring:true, order:2},
+    {id:'t4', name:'Take the bins out', emoji:'🗑️', recurring:true, order:3},
+    {id:'t5', name:'Shower', emoji:'🚿', recurring:true, order:4},
   ];
 
   const EMOJI_CHOICES = ['🛏️','🍽️','🧹','🧺','🗑️','🚿','🏃','📚','🧽','🪴','🐕','🧴','💧','🛒','🧑‍🍳','✅'];
@@ -477,6 +526,17 @@
     d.setDate(d.getDate() + n);
     return todayStr(d);
   }
+  function isoWeekKey(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    const target = new Date(d.valueOf());
+    const dayNr = (d.getDay() + 6) % 7; // Monday = 0
+    target.setDate(target.getDate() - dayNr + 3); // Thursday of this ISO week
+    const firstThursday = new Date(target.getFullYear(), 0, 4);
+    const firstDayNr = (firstThursday.getDay() + 6) % 7;
+    firstThursday.setDate(firstThursday.getDate() - firstDayNr + 3);
+    const week = 1 + Math.round((target - firstThursday) / (7*86400000));
+    return `${target.getFullYear()}-W${String(week).padStart(2,'0')}`;
+  }
   function uid(){ return 'x' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
 
   function defaultState(){
@@ -485,11 +545,12 @@
       completions: {},          // { '2026-09-03': ['t1','t2'] }
       longestStreak: 0,
       lastActiveDate: null,
-      settings: { sound:true, haptics:true, soundPack:'mechanical' },
-      totalXP: 0,
+      settings: { sound:true, haptics:true, soundPack:'mechanical', reminders:{ enabled:false, time:'19:00', serverUrl:'' } },
       totalCompleted: 0,
       perfectDays: 0,
       celebratedDates: {},      // dates for which we've already shown final celebration
+      doneLabels: {},           // 'date:taskId' -> which quiet confirmation word was shown
+      graceNotifiedWeek: null,  // ISO week key already shown the "grace protected you" flourish
     };
   }
 
@@ -500,6 +561,7 @@
         const parsed = JSON.parse(raw);
         state = Object.assign(defaultState(), parsed);
         state.settings = Object.assign({sound:true,haptics:true,soundPack:'mechanical'}, parsed.settings||{});
+        state.settings.reminders = Object.assign({enabled:false,time:'19:00',serverUrl:''}, (parsed.settings&&parsed.settings.reminders)||{});
       } else {
         state = defaultState();
       }
@@ -519,6 +581,8 @@
 
   /* ============================= AUDIO ENGINE ============================= */
   let actx = null;
+  let masterFilter = null;
+
   function ctx(){
     if(!actx){
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -528,7 +592,21 @@
     return actx;
   }
 
-  function tone(c, {freq=440, type='sine', start=0, dur=0.14, peak=0.25, glideTo=null, delayMs=0}){
+  // Every sound routes through one shared gentle lowpass — this is what
+  // takes the edge off otherwise-bright waveforms and keeps every pack
+  // sounding warm rather than sharp, without dulling the transient.
+  function master(c){
+    if(!masterFilter){
+      masterFilter = c.createBiquadFilter();
+      masterFilter.type = 'lowpass';
+      masterFilter.frequency.value = 4600;
+      masterFilter.Q.value = 0.35;
+      masterFilter.connect(c.destination);
+    }
+    return masterFilter;
+  }
+
+  function tone(c, {freq=440, type='sine', start=0, dur=0.16, peak=0.22, glideTo=null, delayMs=0}){
     const t0 = c.currentTime + delayMs/1000 + start;
     const osc = c.createOscillator();
     const gain = c.createGain();
@@ -536,14 +614,14 @@
     osc.frequency.setValueAtTime(freq, t0);
     if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, t0+dur);
     gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(peak, t0+0.012);
+    gain.gain.exponentialRampToValueAtTime(peak, t0+0.022);
     gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
-    osc.connect(gain).connect(c.destination);
+    osc.connect(gain).connect(master(c));
     osc.start(t0);
     osc.stop(t0+dur+0.02);
   }
 
-  function noiseClick(c, {dur=0.05, peak=0.3, delayMs=0, filterFreq=1800}){
+  function noiseClick(c, {dur=0.05, peak=0.24, delayMs=0, filterFreq=1000}){
     const t0 = c.currentTime + delayMs/1000;
     const bufferSize = c.sampleRate * dur;
     const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
@@ -552,61 +630,65 @@
     const src = c.createBufferSource();
     src.buffer = buffer;
     const filt = c.createBiquadFilter();
-    filt.type = 'bandpass';
+    filt.type = 'lowpass';
     filt.frequency.value = filterFreq;
+    filt.Q.value = 0.3;
     const gain = c.createGain();
     gain.gain.setValueAtTime(peak, t0);
     gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
-    src.connect(filt).connect(gain).connect(c.destination);
+    src.connect(filt).connect(gain).connect(master(c));
     src.start(t0);
   }
 
+  // Softer, rounder waveforms throughout (triangle/sine instead of
+  // square/sawtooth), lower-register notes, and a touch more room between
+  // notes — aiming for "satisfying thud" over "sharp beep."
+  // `mult` nudges the tonal pitch up slightly with each successive
+  // completion in a day, so the loop builds gently toward the finale.
   const PACK_CLICK = {
-    mechanical(c){ noiseClick(c,{dur:0.04,peak:0.35,filterFreq:2600}); tone(c,{freq:180,type:'square',dur:0.06,peak:0.14,delayMs:15}); },
-    crystal(c){ tone(c,{freq:1046,type:'sine',dur:0.28,peak:0.2}); tone(c,{freq:1568,type:'sine',dur:0.32,peak:0.12,delayMs:30}); },
-    electric(c){ tone(c,{freq:220,type:'sawtooth',dur:0.12,peak:0.18,glideTo:660}); },
-    arcade(c){ tone(c,{freq:523,type:'square',dur:0.06,peak:0.16}); tone(c,{freq:784,type:'square',dur:0.09,peak:0.16,delayMs:55}); },
-    scifi(c){ tone(c,{freq:300,type:'sine',dur:0.2,peak:0.16,glideTo:900}); tone(c,{freq:900,type:'triangle',dur:0.12,peak:0.08,delayMs:120}); },
-    zen(c){ tone(c,{freq:392,type:'sine',dur:0.55,peak:0.14}); tone(c,{freq:587,type:'sine',dur:0.6,peak:0.08,delayMs:60}); },
+    mechanical(c,m=1){ noiseClick(c,{dur:0.045,peak:0.2,filterFreq:850}); tone(c,{freq:165*m,type:'sine',dur:0.1,peak:0.15,delayMs:12}); },
+    crystal(c,m=1){ tone(c,{freq:784*m,type:'sine',dur:0.3,peak:0.16}); tone(c,{freq:1174*m,type:'sine',dur:0.34,peak:0.09,delayMs:35}); },
+    electric(c,m=1){ tone(c,{freq:220*m,type:'triangle',dur:0.16,peak:0.15,glideTo:480*m}); },
+    arcade(c,m=1){ tone(c,{freq:440*m,type:'triangle',dur:0.08,peak:0.14}); tone(c,{freq:659*m,type:'triangle',dur:0.13,peak:0.13,delayMs:60}); },
+    scifi(c,m=1){ tone(c,{freq:260*m,type:'sine',dur:0.22,peak:0.14,glideTo:640*m}); tone(c,{freq:640*m,type:'triangle',dur:0.13,peak:0.06,delayMs:135}); },
+    zen(c,m=1){ tone(c,{freq:349*m,type:'sine',dur:0.55,peak:0.13}); tone(c,{freq:523*m,type:'sine',dur:0.6,peak:0.07,delayMs:65}); },
   };
 
   const PACK_FINALE = {
     mechanical(c){
-      [220,330,440,660].forEach((f,i)=> tone(c,{freq:f,type:'square',dur:0.16,peak:0.16,delayMs:i*90}));
-      noiseClick(c,{dur:0.3,peak:0.3,delayMs:380,filterFreq:900});
-      tone(c,{freq:110,type:'square',dur:0.4,peak:0.22,delayMs:380});
+      [196,262,330,440].forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.22,peak:0.13,delayMs:i*100}));
+      noiseClick(c,{dur:0.26,peak:0.2,delayMs:420,filterFreq:700});
+      tone(c,{freq:98,type:'sine',dur:0.45,peak:0.2,delayMs:420});
     },
     crystal(c){
-      [523,659,784,1046,1318].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.4,peak:0.16,delayMs:i*100}));
-      for(let i=0;i<8;i++) tone(c,{freq:1400+Math.random()*1400,type:'sine',dur:0.18,peak:0.06,delayMs:520+i*40});
+      [440,554,659,880,1108].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.42,peak:0.13,delayMs:i*110}));
+      for(let i=0;i<7;i++) tone(c,{freq:1000+Math.random()*900,type:'sine',dur:0.2,peak:0.045,delayMs:560+i*45});
     },
     electric(c){
-      tone(c,{freq:110,type:'sawtooth',dur:0.5,peak:0.22,glideTo:880,delayMs:0});
-      [440,660,880,1320].forEach((f,i)=> tone(c,{freq:f,type:'sawtooth',dur:0.15,peak:0.14,delayMs:400+i*70}));
+      tone(c,{freq:130,type:'triangle',dur:0.55,peak:0.17,glideTo:520});
+      [330,440,550,660].forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.18,peak:0.11,delayMs:420+i*80}));
     },
     arcade(c){
-      [523,659,784,1046,1318,1568].forEach((f,i)=> tone(c,{freq:f,type:'square',dur:0.12,peak:0.15,delayMs:i*80}));
+      [440,554,659,880,1108,1318].forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.15,peak:0.12,delayMs:i*95}));
     },
     scifi(c){
-      tone(c,{freq:150,type:'sine',dur:0.8,peak:0.18,glideTo:1200,delayMs:0});
-      for(let i=0;i<6;i++) tone(c,{freq:800+Math.random()*1600,type:'triangle',dur:0.14,peak:0.07,delayMs:500+i*60});
+      tone(c,{freq:130,type:'sine',dur:0.8,peak:0.15,glideTo:780});
+      for(let i=0;i<5;i++) tone(c,{freq:600+Math.random()*900,type:'triangle',dur:0.16,peak:0.06,delayMs:520+i*70});
     },
     zen(c){
-      [392,523,659,784].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.9,peak:0.14,delayMs:i*220}));
+      [349,440,523,659].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.95,peak:0.12,delayMs:i*230}));
     },
   };
 
-  function playClick(){
+  function playClick(doneSoFar=0){
     if(!state.settings.sound) return;
-    try{ const c = ctx(); (PACK_CLICK[state.settings.soundPack]||PACK_CLICK.mechanical)(c); }catch(e){}
+    // gentle rising pitch across the day: +3.5% per prior completion, capped at 6 steps (~21%)
+    const mult = 1 + Math.min(doneSoFar, 6) * 0.035;
+    try{ const c = ctx(); (PACK_CLICK[state.settings.soundPack]||PACK_CLICK.mechanical)(c, mult); }catch(e){}
   }
   function playFinale(){
     if(!state.settings.sound) return;
     try{ const c = ctx(); (PACK_FINALE[state.settings.soundPack]||PACK_FINALE.mechanical)(c); }catch(e){}
-  }
-  function playBonus(){
-    if(!state.settings.sound) return;
-    try{ const c = ctx(); tone(c,{freq:880,type:'sine',dur:0.1,peak:0.18}); tone(c,{freq:1318,type:'sine',dur:0.16,peak:0.16,delayMs:70}); }catch(e){}
   }
 
   function hapticClick(){ if(state.settings.haptics && navigator.vibrate) navigator.vibrate(18); }
@@ -621,65 +703,109 @@
   }
   function isTaskDoneToday(id){ return completedIdsToday().includes(id); }
 
+  function earliestCompletionDate(){
+    const keys = Object.keys(state.completions).sort();
+    return keys.length ? keys[0] : todayStr();
+  }
+
   function computeStreakAndPerfect(){
-    // Perfect days: count all recorded days where completions == task set fully done that day (approx using count)
-    // We recompute longestStreak/perfectDays incrementally on completion events instead of scanning infinitely,
-    // but for correctness on load, do a light scan of completions object (bounded, user-generated only).
-    let perfect = 0;
-    const dates = Object.keys(state.completions);
-    dates.forEach(d=>{
-      const comp = state.completions[d] || [];
-      if(comp.length>0 && comp.length >= activeTasksForToday().length && activeTasksForToday().length>0){
-        // Only counts if this date's completion count meets *current* task list length as an approximation
-      }
-    });
-    // We track perfectDays and totals as running counters (see markComplete), this function only computes current streak.
+    // Walks backward from today (or yesterday if today isn't done yet), counting
+    // consecutive active days. One missed day per ISO week is forgiven — the
+    // streak keeps counting through it — but a second miss in the same week ends it.
     let streak = 0;
     let cursor = todayStr();
     const hasToday = (state.completions[cursor]||[]).length > 0;
     if(!hasToday){ cursor = addDays(cursor, -1); }
+    const earliest = earliestCompletionDate();
+    const graceUsedWeeks = new Set();
     while(true){
+      if(cursor < earliest) break; // never grace-cover days before the user's first activity
       const comp = state.completions[cursor];
-      if(comp && comp.length > 0){ streak++; cursor = addDays(cursor, -1); }
-      else break;
+      if(comp && comp.length > 0){
+        streak++;
+        cursor = addDays(cursor, -1);
+        continue;
+      }
+      const wk = isoWeekKey(cursor);
+      if(!graceUsedWeeks.has(wk)){
+        graceUsedWeeks.add(wk);
+        streak++; // this missed day is forgiven, streak carries through it
+        cursor = addDays(cursor, -1);
+        continue;
+      }
+      break;
     }
     return streak;
   }
 
+  // Whether this week's single grace day has already been used to bridge a gap
+  // earlier in the current streak, purely for a small status note in Stats.
+  function graceUsedThisWeek(){
+    let cursor = todayStr();
+    const hasToday = (state.completions[cursor]||[]).length > 0;
+    if(!hasToday) cursor = addDays(cursor, -1);
+    const earliest = earliestCompletionDate();
+    const thisWeek = isoWeekKey(todayStr());
+    while(true){
+      if(cursor < earliest) return false;
+      const comp = state.completions[cursor];
+      if(comp && comp.length > 0){ cursor = addDays(cursor, -1); continue; }
+      if(isoWeekKey(cursor) === thisWeek) return true;
+      break;
+    }
+    return false;
+  }
+
   /* ============================= ACTIONS ============================= */
+  const CONFIRM_WORDS = ['Done', 'Nice', 'Solid', 'Got it', 'Nailed it', 'Locked in', 'Clean'];
+
   function markComplete(taskId){
     const t = todayStr();
     if(!state.completions[t]) state.completions[t] = [];
     if(state.completions[t].includes(taskId)) return;
+
+    const doneSoFar = state.completions[t].length; // how many already done today, before this one
     state.completions[t].push(taskId);
-
-    const task = state.tasks.find(x=>x.id===taskId);
-    let xpGain = task ? task.xp : 10;
-    let bonusLabel = null;
-    const roll = Math.random();
-    if(roll < 0.03){ xpGain += 50; bonusLabel = 'JACKPOT +50 XP'; }
-    else if(roll < 0.13){ xpGain += 25; bonusLabel = 'PERFECT HIT! +25 XP'; }
-
-    state.totalXP += xpGain;
+    state.doneLabels[`${t}:${taskId}`] = CONFIRM_WORDS[Math.floor(Math.random()*CONFIRM_WORDS.length)];
     state.totalCompleted += 1;
 
-    playClick();
+    playClick(doneSoFar);
     hapticClick();
-    if(bonusLabel){ setTimeout(()=>{ playBonus(); showToast(bonusLabel); }, 160); }
 
     saveState();
     renderHome();
+    syncWeeklySummary();
 
     const todays = activeTasksForToday();
     const doneCount = (state.completions[t]||[]).length;
     if(todays.length>0 && doneCount >= todays.length && !state.celebratedDates[t]){
       state.celebratedDates[t] = true;
-      const wasAlreadyPerfect = false;
       state.perfectDays += 1;
       state.longestStreak = Math.max(state.longestStreak, computeStreakAndPerfect());
       saveState();
+      notifyServerCompletedToday();
       setTimeout(()=> triggerCelebration(), 420);
     }
+  }
+
+  function unmarkComplete(taskId){
+    const t = todayStr();
+    const list = state.completions[t] || [];
+    const idx = list.indexOf(taskId);
+    if(idx === -1) return;
+    list.splice(idx, 1);
+    delete state.doneLabels[`${t}:${taskId}`];
+    state.totalCompleted = Math.max(0, state.totalCompleted - 1);
+
+    if(state.celebratedDates[t]){
+      // undoing the task that completed the day — roll the celebration back
+      delete state.celebratedDates[t];
+      state.perfectDays = Math.max(0, state.perfectDays - 1);
+      notifyServerUncompletedToday();
+    }
+
+    saveState();
+    renderHome();
   }
 
   function showToast(text){
@@ -735,6 +861,188 @@
     renderHome();
   });
 
+  /* ============================= PUSH NOTIFICATIONS (daily reminder) ============================= */
+  function urlBase64ToUint8Array(base64String){
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for(let i=0;i<rawData.length;i++) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  }
+
+  function pushSupported(){
+    return 'serviceWorker' in navigator && 'PushManager' in window && window.isSecureContext;
+  }
+
+  function cleanServerUrl(url){
+    return (url||'').trim().replace(/\/+$/,'');
+  }
+
+  async function subscribeToPush(){
+    const serverUrl = cleanServerUrl(state.settings.reminders.serverUrl);
+    if(!serverUrl){ showToast('Add a server URL first'); return false; }
+    if(!pushSupported()){ showToast('Push isn\'t supported on this browser/device'); return false; }
+
+    const permission = await Notification.requestPermission();
+    if(permission !== 'granted'){ showToast('Notification permission denied'); return false; }
+
+    try{
+      const reg = await navigator.serviceWorker.ready;
+      const keyRes = await fetch(`${serverUrl}/vapid-public-key`);
+      if(!keyRes.ok) throw new Error('key fetch failed');
+      const { publicKey } = await keyRes.json();
+
+      let sub = await reg.pushManager.getSubscription();
+      if(!sub){
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+      }
+
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const res = await fetch(`${serverUrl}/subscribe`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          subscription: sub,
+          timezone,
+          reminderTime: state.settings.reminders.time,
+        }),
+      });
+      if(!res.ok) throw new Error('subscribe failed');
+      return true;
+    }catch(e){
+      showToast('Could not reach notification server');
+      return false;
+    }
+  }
+
+  async function unsubscribeFromPush(){
+    const serverUrl = cleanServerUrl(state.settings.reminders.serverUrl);
+    try{
+      if('serviceWorker' in navigator){
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if(sub){
+          if(serverUrl){
+            fetch(`${serverUrl}/unsubscribe`, {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ endpoint: sub.endpoint }),
+            }).catch(()=>{});
+          }
+          await sub.unsubscribe();
+        }
+      }
+    }catch(e){ /* best-effort */ }
+  }
+
+  async function notifyServerCompletedToday(){
+    if(!state.settings.reminders.enabled) return;
+    const serverUrl = cleanServerUrl(state.settings.reminders.serverUrl);
+    if(!serverUrl || !('serviceWorker' in navigator)) return;
+    try{
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if(!sub) return;
+      fetch(`${serverUrl}/completed-today`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ endpoint: sub.endpoint, date: todayStr() }),
+      }).catch(()=>{});
+    }catch(e){ /* best-effort */ }
+  }
+
+  async function notifyServerUncompletedToday(){
+    if(!state.settings.reminders.enabled) return;
+    const serverUrl = cleanServerUrl(state.settings.reminders.serverUrl);
+    if(!serverUrl || !('serviceWorker' in navigator)) return;
+    try{
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if(!sub) return;
+      fetch(`${serverUrl}/completed-today`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ endpoint: sub.endpoint, date: null }),
+      }).catch(()=>{});
+    }catch(e){ /* best-effort */ }
+  }
+
+  function weekDaysActiveCount(){
+    const thisWeek = isoWeekKey(todayStr());
+    let count = 0;
+    let cursor = todayStr();
+    for(let i=0;i<7;i++){
+      if(isoWeekKey(cursor) !== thisWeek) break;
+      if((state.completions[cursor]||[]).length > 0) count++;
+      cursor = addDays(cursor, -1);
+    }
+    return count;
+  }
+
+  // Keeps the server's picture of "how this week is going" current, so the
+  // Sunday-evening recap push has real numbers to report rather than nothing.
+  async function syncWeeklySummary(){
+    if(!state.settings.reminders.enabled) return;
+    const serverUrl = cleanServerUrl(state.settings.reminders.serverUrl);
+    if(!serverUrl || !('serviceWorker' in navigator)) return;
+    try{
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if(!sub) return;
+      fetch(`${serverUrl}/weekly-summary`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+          weekKey: isoWeekKey(todayStr()),
+          weekDaysActive: weekDaysActiveCount(),
+          currentStreak: computeStreakAndPerfect(),
+          longestStreak: state.longestStreak,
+        }),
+      }).catch(()=>{});
+    }catch(e){ /* best-effort */ }
+  }
+
+  function renderReminderUI(){
+    const r = state.settings.reminders;
+    setSwitch('toggle-reminder', r.enabled);
+    document.getElementById('reminder-config').classList.toggle('hidden', !r.enabled);
+    document.getElementById('input-reminder-time').value = r.time;
+    document.getElementById('input-server-url').value = r.serverUrl;
+    document.getElementById('reminder-status').textContent = r.enabled
+      ? `Reminds you at ${r.time} if today isn't done`
+      : "Get nudged if today isn't done yet";
+  }
+
+  document.getElementById('toggle-reminder').addEventListener('click', async ()=>{
+    const r = state.settings.reminders;
+    if(!r.enabled){
+      const ok = await subscribeToPush();
+      if(!ok) return;
+      r.enabled = true;
+    } else {
+      await unsubscribeFromPush();
+      r.enabled = false;
+    }
+    saveState();
+    renderReminderUI();
+  });
+
+  document.getElementById('btn-save-reminder').addEventListener('click', async ()=>{
+    const time = document.getElementById('input-reminder-time').value.trim();
+    const serverUrl = document.getElementById('input-server-url').value.trim();
+    if(!/^([01]\d|2[0-3]):([0-5]\d)$/.test(time)){ showToast('Use 24h format, e.g. 19:00'); return; }
+    state.settings.reminders.time = time;
+    state.settings.reminders.serverUrl = serverUrl;
+    saveState();
+    if(state.settings.reminders.enabled){
+      const ok = await subscribeToPush();
+      if(ok) showToast('Reminder saved');
+    } else {
+      showToast('Reminder saved');
+    }
+  });
+
   function confettiBurst(){
     const canvas = document.getElementById('cel-canvas');
     const dpr = window.devicePixelRatio || 1;
@@ -783,19 +1091,15 @@
   }
 
   /* ============================= RENDER: HOME ============================= */
-  function renderHome(){
-    document.getElementById('streak-num').textContent = computeStreakAndPerfect();
-    document.getElementById('perfect-num').textContent = state.perfectDays;
-
+  function renderHome(animate){
     const todays = activeTasksForToday();
     const doneIds = completedIdsToday();
-    const doneCount = doneIds.length;
     const total = todays.length;
-    const pct = total>0 ? Math.round((doneCount/total)*100) : 0;
 
-    document.getElementById('progress-frac').textContent = `${doneCount} / ${total}`;
-    document.getElementById('meter-fill').style.width = pct + '%';
-    document.getElementById('meter-pct').textContent = pct + '%';
+    // grace-day banner: only worth flagging while there's a streak to protect
+    const streakNow = computeStreakAndPerfect();
+    const banner = document.getElementById('grace-banner');
+    banner.classList.toggle('hidden', !(streakNow > 0 && graceUsedThisWeek()));
 
     const list = document.getElementById('tasklist');
     if(total===0){
@@ -804,17 +1108,20 @@
       return;
     }
     list.innerHTML = '';
-    todays.forEach(task=>{
+    const t = todayStr();
+    todays.forEach((task, i)=>{
       const done = doneIds.includes(task.id);
+      const label = done ? (state.doneLabels[`${t}:${task.id}`] || 'Done') : '';
       const card = document.createElement('div');
-      card.className = 'task-card' + (done?' done':'');
+      card.className = 'task-card' + (done?' done':'') + (animate?' entrance':'');
+      if(animate) card.style.animationDelay = `${i*45}ms`;
       card.innerHTML = `
         <div class="task-emoji">${task.emoji||'✅'}</div>
         <div class="task-body">
           <div class="task-name">${escapeHtml(task.name)}</div>
-          <div class="task-xp">${done ? 'COMPLETE' : '+'+task.xp+' XP'}</div>
+          ${done ? `<div class="task-sub">${escapeHtml(label)} · tap to undo</div>` : ''}
         </div>
-        <button class="complete-btn" aria-label="Complete ${escapeHtml(task.name)}">${done?'✓':'●'}</button>
+        <button class="complete-btn" aria-label="${done ? 'Undo' : 'Complete'} ${escapeHtml(task.name)}">${done?'✓':'●'}</button>
       `;
       const btn = card.querySelector('.complete-btn');
       if(!done){
@@ -824,7 +1131,17 @@
           markComplete(task.id);
         });
       } else {
-        btn.disabled = true;
+        btn.addEventListener('click', ()=>{
+          // play the reverse of the completion look on the live card first —
+          // CSS transitions on these properties carry it smoothly — then swap
+          // the underlying state once the animation has had time to read.
+          card.classList.remove('done');
+          btn.textContent = '●';
+          btn.setAttribute('aria-label', `Complete ${escapeHtml(task.name)}`);
+          const sub = card.querySelector('.task-sub');
+          if(sub) sub.remove();
+          setTimeout(()=> unmarkComplete(task.id), 220);
+        });
       }
       list.appendChild(card);
     });
@@ -835,10 +1152,36 @@
   }
 
   /* ============================= RENDER: STATS ============================= */
+  // Rolls a number up from 0 to its target with an ease-out curve — used for
+  // the streak chips and stat cards whenever the Stats tab is opened.
+  function animateNumber(el, to, suffix='', duration=650){
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min(1, (now-start)/duration);
+      const eased = 1 - Math.pow(1-t, 3);
+      el.textContent = Math.round(to*eased) + suffix;
+      if(t < 1) requestAnimationFrame(tick);
+      else el.textContent = to + suffix;
+    }
+    requestAnimationFrame(tick);
+  }
+
   function renderStats(){
+    const streak = computeStreakAndPerfect();
+    animateNumber(document.getElementById('streak-num'), streak);
+    animateNumber(document.getElementById('perfect-num'), state.perfectDays);
+
+    const noteEl = document.getElementById('streak-note');
+    if(streak === 0){
+      noteEl.innerHTML = 'Start today. Every streak begins at <b>1</b>.';
+    } else if(graceUsedThisWeek()){
+      noteEl.innerHTML = '❄️ One day this week was <b>forgiven</b>. Your streak is protected.';
+    } else {
+      noteEl.innerHTML = 'Missing one day this week <b>won\'t</b> break your streak.';
+    }
+
     const grid = document.getElementById('stats-grid');
     const dates = Object.keys(state.completions);
-    const now = new Date();
     const weekAgo = addDays(todayStr(),-6);
     const monthAgo = addDays(todayStr(),-29);
     let thisWeek=0, thisMonth=0, totalCompletionDays = dates.filter(d=>(state.completions[d]||[]).length>0).length;
@@ -850,16 +1193,16 @@
     const completionRate = totalCompletionDays>0 ? Math.round((state.perfectDays/totalCompletionDays)*100) : 0;
 
     const cards = [
-      [computeStreakAndPerfect(), 'CURRENT STREAK'],
-      [state.longestStreak, 'LONGEST STREAK'],
-      [state.totalCompleted, 'TASKS COMPLETED'],
-      [state.totalXP, 'TOTAL XP'],
-      [state.perfectDays, 'PERFECT DAYS'],
-      [completionRate+'%', 'PERFECT RATE'],
-      [thisWeek, 'DONE THIS WEEK'],
-      [thisMonth, 'DONE THIS MONTH'],
+      [state.longestStreak, '', 'LONGEST STREAK'],
+      [state.totalCompleted, '', 'TASKS COMPLETED'],
+      [completionRate, '%', 'PERFECT RATE'],
+      [thisWeek, '', 'DONE THIS WEEK'],
+      [thisMonth, '', 'DONE THIS MONTH'],
     ];
-    grid.innerHTML = cards.map(([n,l])=>`<div class="stat-card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+    grid.innerHTML = cards.map(([n,suf,l])=>`<div class="stat-card"><div class="n" data-target="${n}" data-suffix="${suf}">0${suf}</div><div class="l">${l}</div></div>`).join('');
+    grid.querySelectorAll('.n').forEach(el=>{
+      animateNumber(el, Number(el.dataset.target), el.dataset.suffix || '');
+    });
   }
 
   /* ============================= RENDER: MANAGE ============================= */
@@ -874,23 +1217,23 @@
     tasks.forEach((task, i)=>{
       const row = document.createElement('div');
       row.className = 'task-card editrow';
+      row.dataset.id = task.id;
+      row.style.order = i;
       row.innerHTML = `
+        <button class="drag-handle" aria-label="Drag to reorder ${escapeHtml(task.name)}">⠿</button>
         <div class="task-emoji">${task.emoji||'✅'}</div>
         <div class="task-body">
           <div class="task-name">${escapeHtml(task.name)}</div>
-          <div class="task-xp">${task.xp} XP · ${task.recurring? 'Daily':'One-time'}</div>
+          <div class="task-sub">${task.recurring? 'Repeats daily':'One-time'}</div>
         </div>
         <div class="task-manage-btns">
-          <button class="mini-btn" data-act="up" ${i===0?'disabled style="opacity:.3"':''}>↑</button>
-          <button class="mini-btn" data-act="down" ${i===tasks.length-1?'disabled style="opacity:.3"':''}>↓</button>
           <button class="mini-btn" data-act="edit">✎</button>
           <button class="mini-btn danger" data-act="delete" aria-label="Delete ${escapeHtml(task.name)}">✕</button>
         </div>
       `;
-      row.querySelector('[data-act=up]').addEventListener('click', ()=> reorder(task.id,-1));
-      row.querySelector('[data-act=down]').addEventListener('click', ()=> reorder(task.id,1));
       row.querySelector('[data-act=edit]').addEventListener('click', ()=> openTaskSheet(task));
       row.querySelector('[data-act=delete]').addEventListener('click', ()=> deleteTaskDirect(task.id, task.name));
+      row.querySelector('.drag-handle').addEventListener('pointerdown', (e)=> startDrag(e, row, task.id));
       list.appendChild(row);
     });
   }
@@ -903,16 +1246,120 @@
     renderHome();
   }
 
-  function reorder(taskId, dir){
-    const tasks = activeTasksForToday();
-    const idx = tasks.findIndex(t=>t.id===taskId);
-    const swapIdx = idx+dir;
-    if(swapIdx<0 || swapIdx>=tasks.length) return;
-    const a = tasks[idx], b = tasks[swapIdx];
-    const tmp = a.order; a.order = b.order; b.order = tmp;
+  /* ---- drag-to-reorder (pointer events; #managelist is a flex column,
+     reordering is done live via the CSS `order` property) ---- */
+  let dragState = null;
+
+  function startDrag(e, row, taskId){
+    e.preventDefault();
+    const list = document.getElementById('managelist');
+    const listRect = list.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const gapStr = getComputedStyle(list).rowGap || getComputedStyle(list).gap || '10px';
+    const gap = parseFloat(gapStr) || 10;
+    const rowHeight = rowRect.height + gap;
+
+    const orderedIds = activeTasksForToday().map(t=>t.id);
+
+    const ghost = row.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.style.left = rowRect.left+'px';
+    ghost.style.top = rowRect.top+'px';
+    ghost.style.width = rowRect.width+'px';
+    ghost.style.transform = 'scale(1)';
+    ghost.style.boxShadow = 'none';
+    document.body.appendChild(ghost);
+    // lift: a quick scale + shadow grow, as if physically picking the card up
+    requestAnimationFrame(()=>{
+      ghost.style.transition = 'transform 140ms cubic-bezier(.22,1,.36,1), box-shadow 140ms ease';
+      ghost.style.transform = 'scale(1.035)';
+      ghost.style.boxShadow = '0 18px 34px -10px rgba(0,0,0,.65)';
+    });
+
+    row.style.opacity = '0';
+    row.style.pointerEvents = 'none';
+
+    dragState = {
+      taskId, row, ghost, listRect, rowHeight,
+      grabOffsetY: e.clientY - rowRect.top,
+      orderedIds,
+      dragIndex: orderedIds.indexOf(taskId),
+    };
+
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', onDragEnd, {once:true});
+    document.addEventListener('pointercancel', onDragEnd, {once:true});
+  }
+
+  function onDragMove(e){
+    if(!dragState) return;
+    const { ghost, listRect, rowHeight, grabOffsetY, taskId } = dragState;
+    const newTop = e.clientY - grabOffsetY;
+    ghost.style.top = newTop + 'px';
+
+    const relativeY = (newTop + rowHeight/2) - listRect.top;
+    let newIndex = Math.floor(relativeY / rowHeight);
+    newIndex = Math.max(0, Math.min(dragState.orderedIds.length-1, newIndex));
+
+    if(newIndex !== dragState.dragIndex){
+      const ids = dragState.orderedIds;
+      const from = ids.indexOf(taskId);
+      ids.splice(from, 1);
+      ids.splice(newIndex, 0, taskId);
+      dragState.dragIndex = newIndex;
+      applyOrderWithFlip(ids, taskId);
+    }
+  }
+
+  // FLIP (First-Last-Invert-Play): the other rows glide smoothly to their new
+  // slot instead of snapping — the same tactile, physical feel as the rest
+  // of the app, applied to reordering.
+  function applyOrderWithFlip(ids, skipId){
+    const list = document.getElementById('managelist');
+    const rows = ids
+      .map(id => list.querySelector(`[data-id="${id}"]`))
+      .filter(el => el && el.dataset.id !== skipId);
+
+    const firstRects = new Map();
+    rows.forEach(el => firstRects.set(el, el.getBoundingClientRect()));
+
+    ids.forEach((id, idx)=>{
+      const el = list.querySelector(`[data-id="${id}"]`);
+      if(el) el.style.order = idx;
+    });
+
+    rows.forEach(el=>{
+      const first = firstRects.get(el);
+      const last = el.getBoundingClientRect();
+      const dy = first.top - last.top;
+      if(Math.abs(dy) < 0.5) return;
+      el.style.transition = 'none';
+      el.style.transform = `translateY(${dy}px)`;
+      el.getBoundingClientRect(); // force reflow so the jump above applies before we animate away from it
+      requestAnimationFrame(()=>{
+        el.style.transition = 'transform 240ms cubic-bezier(.22,1,.36,1)';
+        el.style.transform = '';
+      });
+    });
+  }
+
+  function onDragEnd(){
+    if(!dragState) return;
+    document.removeEventListener('pointermove', onDragMove);
+    const { row, ghost, orderedIds } = dragState;
+    ghost.remove();
+    row.style.opacity = '';
+    row.style.pointerEvents = '';
+
+    orderedIds.forEach((id, idx)=>{
+      const t = state.tasks.find(x=>x.id===id);
+      if(t) t.order = idx;
+    });
     saveState();
+    dragState = null;
     renderManage();
   }
+
 
   /* ============================= TASK SHEET ============================= */
   let editingTaskId = null;
@@ -940,7 +1387,6 @@
     pickedEmoji = task ? (task.emoji||'✅') : '✅';
     document.getElementById('task-sheet-title').textContent = task ? 'Edit task' : 'New task';
     document.getElementById('input-task-name').value = task ? task.name : '';
-    document.getElementById('input-task-xp').value = task ? task.xp : 10;
     setSwitch('toggle-recurring', task ? task.recurring : true);
     buildEmojiRow();
     document.getElementById('btn-delete-task').classList.toggle('hidden', !task);
@@ -951,14 +1397,13 @@
   document.getElementById('btn-save-task').addEventListener('click', ()=>{
     const name = document.getElementById('input-task-name').value.trim();
     if(!name) return;
-    const xp = Math.max(1, parseInt(document.getElementById('input-task-xp').value)||10);
     const recurring = getSwitch('toggle-recurring');
     if(editingTaskId){
       const t = state.tasks.find(x=>x.id===editingTaskId);
-      t.name = name; t.emoji = pickedEmoji; t.xp = xp; t.recurring = recurring;
+      t.name = name; t.emoji = pickedEmoji; t.recurring = recurring;
     } else {
       const maxOrder = state.tasks.reduce((m,t)=>Math.max(m,t.order), -1);
-      state.tasks.push({id:uid(), name, emoji:pickedEmoji, xp, recurring, order:maxOrder+1});
+      state.tasks.push({id:uid(), name, emoji:pickedEmoji, recurring, order:maxOrder+1});
     }
     saveState();
     closeSheet('sheet-task');
@@ -1011,6 +1456,7 @@
     setSwitch('toggle-sound', state.settings.sound);
     setSwitch('toggle-haptics', state.settings.haptics);
     renderPackList();
+    renderReminderUI();
     openSheet('sheet-settings');
   });
 
@@ -1027,6 +1473,7 @@
   document.getElementById('btn-preview-sound').addEventListener('click', ()=> playClick());
   document.getElementById('btn-reset-data').addEventListener('click', async ()=>{
     if(!confirm('Reset all tasks, streaks, and stats? This cannot be undone.')) return;
+    await unsubscribeFromPush();
     state = defaultState();
     saveState();
     closeSheet('sheet-settings');
@@ -1061,13 +1508,33 @@
     document.querySelectorAll('.navbtn').forEach(b=> b.classList.toggle('active', b.dataset.view===name));
     if(name==='stats') renderStats();
     if(name==='manage') renderManage();
-    if(name==='home') renderHome();
+    if(name==='home') renderHome(true);
   }
   document.querySelectorAll('.navbtn').forEach(b=>{
     b.addEventListener('click', ()=> switchView(b.dataset.view));
   });
 
   /* ============================= INIT ============================= */
+  function checkGraceFlourish(){
+    const streak = computeStreakAndPerfect();
+    if(streak === 0 || !graceUsedThisWeek()) return;
+    const wk = isoWeekKey(todayStr());
+    if(state.graceNotifiedWeek === wk) return;
+    state.graceNotifiedWeek = wk;
+    saveState();
+    setTimeout(()=>{
+      showToast('❄️ A missed day was forgiven. Streak protected!');
+      if(state.settings.haptics && navigator.vibrate) navigator.vibrate([20,40,20]);
+      if(state.settings.sound){
+        try{
+          const c = ctx();
+          tone(c,{freq:660,type:'sine',dur:0.18,peak:0.14});
+          tone(c,{freq:880,type:'sine',dur:0.22,peak:0.12,delayMs:90});
+        }catch(e){}
+      }
+    }, 500);
+  }
+
   async function init(){
     await loadState();
     // keep longestStreak in sync on load
@@ -1075,7 +1542,9 @@
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('bottomnav').classList.remove('hidden');
-    renderHome();
+    renderHome(true);
+    syncWeeklySummary();
+    checkGraceFlourish();
     // unlock a resize listener for celebration canvas correctness
     window.addEventListener('resize', ()=>{});
   }
