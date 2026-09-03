@@ -40,13 +40,15 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
     height:100%;
+    height:100vh;
+    height:-webkit-fill-available;
     height:100dvh;
     height:var(--app-height, 100dvh);
     overflow:hidden;
     overscroll-behavior:none;
   }
   html{
-    background: #0A0B0C;
+    background: #1D1E20;
   }
   body{
     margin:0;
@@ -352,9 +354,14 @@
 (function(){
   // iOS standalone PWAs can miscalculate 100dvh, sometimes still reserving
   // space as if Safari's (nonexistent, in standalone mode) chrome could
-  // appear. Measuring the real height in JS sidesteps that entirely.
+  // appear. Rather than trust one measurement, take the largest of several —
+  // overshooting is safe (the extra is just clipped by overflow:hidden),
+  // undershooting is what leaves a visible gap.
   function setAppHeight(){
-    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    var vals = [window.innerHeight];
+    if(window.visualViewport && window.visualViewport.height) vals.push(window.visualViewport.height);
+    if(window.screen && window.screen.height) vals.push(window.screen.height);
+    var h = Math.max.apply(null, vals);
     document.documentElement.style.setProperty('--app-height', h + 'px');
   }
   setAppHeight();
