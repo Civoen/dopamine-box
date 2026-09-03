@@ -1,7 +1,7 @@
 // Dopamine Box — service worker
 // Bump CACHE_VERSION whenever index.html (or other cached assets) change,
 // so returning users pick up the new version instead of a stale cache.
-const CACHE_VERSION = 'dopamine-box-v4';
+const CACHE_VERSION = 'dopamine-box-v5';
 
 const APP_SHELL = [
   './',

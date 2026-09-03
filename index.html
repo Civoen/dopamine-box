@@ -218,25 +218,23 @@
   /* ---------- Bottom nav ---------- */
   /* Normal flow, not position:fixed — it's the last child of body's flex
      column, so it just sits after the scrollable area with no viewport
-     positioning ambiguity. z-index kept in case anything needs to layer
-     under it during transitions. */
+     positioning ambiguity. Edge-to-edge (not a floating inset pill) so its
+     background always reaches the true bottom of the screen — any leftover
+     safe-area is colored padding inside the bar, never an empty gap below it. */
   #bottomnav{
     flex-shrink:0; z-index:40;
     display:flex; justify-content:center;
-    padding:0 16px calc(var(--safe-bottom) + 10px);
+    background:rgba(31,32,34,.92);
+    backdrop-filter:blur(18px);
+    border-top:1px solid var(--line);
+    padding:10px 16px calc(var(--safe-bottom) + 10px);
   }
   .navwrap{
     width:100%; max-width:480px;
   }
   .navbar{
-    background:rgba(31,32,34,.86);
-    backdrop-filter:blur(18px);
-    border:1px solid var(--line);
-    border-radius:22px;
     display:flex;
-    padding:8px;
     gap:4px;
-    box-shadow:0 14px 30px -12px rgba(0,0,0,.6);
   }
   .navbtn{
     flex:1; background:none; border:none; color:var(--ink-faint);
@@ -436,7 +434,7 @@
 <div id="bottomnav" class="hidden">
   <div class="navwrap">
     <div class="navbar">
-      <button class="navbtn" data-view="manage"><span class="ic">☰</span>Tasks</button>
+      <button class="navbtn" data-view="manage"><span class="ic">◇</span>Tasks</button>
       <button class="navbtn active" data-view="home"><span class="ic">◆</span>Today</button>
       <button class="navbtn" data-view="stats"><span class="ic">◈</span>Stats</button>
     </div>
