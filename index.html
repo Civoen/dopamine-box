@@ -40,6 +40,7 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
     height:100%;
+    height:100dvh;
     overflow:hidden;
     overscroll-behavior:none;
   }
@@ -212,11 +213,10 @@
   #bottomnav{
     position:fixed; left:0; right:0; bottom:0; z-index:40;
     display:flex; justify-content:center;
+    padding:0 16px calc(var(--safe-bottom) + 10px);
   }
   .navwrap{
     width:100%; max-width:480px;
-    margin:0 16px;
-    padding-bottom:calc(var(--safe-bottom) + 14px);
   }
   .navbar{
     background:rgba(20,18,32,.86);
@@ -251,7 +251,14 @@
   }
   .sheet-backdrop.open .sheet{ transform:translateY(0); }
   .sheet-handle{ width:36px; height:4px; background:var(--line); border-radius:999px; margin:8px auto 14px; }
-  .sheet h2{ font-family:var(--font-display); font-size:19px; margin:0 0 16px; }
+  .sheet h2{ font-family:var(--font-display); font-size:19px; margin:0; }
+  .sheet-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .sheet-close{
+    width:32px; height:32px; border-radius:50%; border:1px solid var(--line);
+    background:var(--bg-2); color:var(--ink-dim); font-size:14px; display:flex;
+    align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .sheet-close:active{ transform:scale(0.92); }
   .field{ margin-bottom:16px; }
   .field label{ display:block; font-size:12px; color:var(--ink-faint); margin-bottom:7px; letter-spacing:.03em; font-weight:600;}
   .field input[type=text], .field input[type=number]{
@@ -413,7 +420,10 @@
 <div class="sheet-backdrop" id="sheet-task">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <h2 id="task-sheet-title">New task</h2>
+    <div class="sheet-head">
+      <h2 id="task-sheet-title">New task</h2>
+      <button class="sheet-close" id="btn-close-task" aria-label="Close">✕</button>
+    </div>
     <div class="field">
       <label>What do you need to do?</label>
       <input type="text" id="input-task-name" placeholder="e.g. Do the dishes" maxlength="40">
@@ -435,7 +445,10 @@
 <div class="sheet-backdrop" id="sheet-settings">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <h2>Settings</h2>
+    <div class="sheet-head">
+      <h2>Settings</h2>
+      <button class="sheet-close" id="btn-close-settings" aria-label="Close">✕</button>
+    </div>
     <div class="toggle-row">
       <div><div class="t">Sound</div><div class="d">Completion sound effects</div></div>
       <div class="switch on" id="toggle-sound"><div class="knob"></div></div>
@@ -662,18 +675,26 @@
     },
     crystal(c){
       [440,554,659,880,1108].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.42,peak:0.13,delayMs:i*110}));
-      for(let i=0;i<7;i++) tone(c,{freq:1000+Math.random()*900,type:'sine',dur:0.2,peak:0.045,delayMs:560+i*45});
+      // shimmer notes are picked from a scale related to the arpeggio above,
+      // not a continuous random range — keeps the sparkle consonant instead
+      // of clashing against itself.
+      const shimmer = [1318,1480,1568,1760,1976];
+      shimmer.forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.2,peak:0.045,delayMs:560+i*65}));
     },
     electric(c){
-      tone(c,{freq:130,type:'triangle',dur:0.55,peak:0.17,glideTo:520});
+      // one octave, not two — a wide fast glide reads as a siren, not a swell
+      tone(c,{freq:165,type:'triangle',dur:0.55,peak:0.17,glideTo:330});
       [330,440,550,660].forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.18,peak:0.11,delayMs:420+i*80}));
     },
     arcade(c){
       [440,554,659,880,1108,1318].forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.15,peak:0.12,delayMs:i*95}));
     },
     scifi(c){
-      tone(c,{freq:130,type:'sine',dur:0.8,peak:0.15,glideTo:780});
-      for(let i=0;i<5;i++) tone(c,{freq:600+Math.random()*900,type:'triangle',dur:0.16,peak:0.06,delayMs:520+i*70});
+      // gentler, slower sweep (one octave over 0.8s) instead of a 2.5-octave
+      // rocket-launch glide, plus quantized shimmer for the same reason as crystal
+      tone(c,{freq:220,type:'sine',dur:0.8,peak:0.15,glideTo:440});
+      const shimmer = [880,988,1175,1319];
+      shimmer.forEach((f,i)=> tone(c,{freq:f,type:'triangle',dur:0.16,peak:0.06,delayMs:540+i*90}));
     },
     zen(c){
       [349,440,523,659].forEach((f,i)=> tone(c,{freq:f,type:'sine',dur:0.95,peak:0.12,delayMs:i*230}));
@@ -689,6 +710,16 @@
   function playFinale(){
     if(!state.settings.sound) return;
     try{ const c = ctx(); (PACK_FINALE[state.settings.soundPack]||PACK_FINALE.mechanical)(c); }catch(e){}
+  }
+  // A quiet two-note descent — the inverse motion of the click — so undoing
+  // reads as clearly different from completing, without needing its own pack.
+  function playUndo(){
+    if(!state.settings.sound) return;
+    try{
+      const c = ctx();
+      tone(c,{freq:420,type:'sine',dur:0.08,peak:0.13});
+      tone(c,{freq:280,type:'sine',dur:0.14,peak:0.1,delayMs:55});
+    }catch(e){}
   }
 
   function hapticClick(){ if(state.settings.haptics && navigator.vibrate) navigator.vibrate(18); }
@@ -816,8 +847,7 @@
   }
 
   /* ============================= PARTICLES on card ============================= */
-  function burstOnCard(cardEl){
-    const rect = cardEl.getBoundingClientRect();
+  function burstAtRect(rect){
     const layer = document.createElement('div');
     layer.style.position='fixed';
     layer.style.left='0'; layer.style.top='0'; layer.style.width='100%'; layer.style.height='100%';
@@ -1126,9 +1156,13 @@
       const btn = card.querySelector('.complete-btn');
       if(!done){
         btn.addEventListener('click', ()=>{
-          burstOnCard(card);
+          // capture position before the (synchronous, heavy) re-render below —
+          // starting the burst only after that settles keeps it from stuttering
+          // in partway through, which read as "dots popping in late."
+          const rect = card.getBoundingClientRect();
           card.classList.add('done');
           markComplete(task.id);
+          requestAnimationFrame(()=> burstAtRect(rect));
         });
       } else {
         btn.addEventListener('click', ()=>{
@@ -1140,6 +1174,8 @@
           btn.setAttribute('aria-label', `Complete ${escapeHtml(task.name)}`);
           const sub = card.querySelector('.task-sub');
           if(sub) sub.remove();
+          playUndo();
+          hapticClick();
           setTimeout(()=> unmarkComplete(task.id), 220);
         });
       }
@@ -1498,6 +1534,8 @@
   document.querySelectorAll('.sheet-backdrop').forEach(b=>{
     b.addEventListener('click', (e)=>{ if(e.target===b) b.classList.remove('open'); });
   });
+  document.getElementById('btn-close-task').addEventListener('click', ()=> closeSheet('sheet-task'));
+  document.getElementById('btn-close-settings').addEventListener('click', ()=> closeSheet('sheet-settings'));
 
   /* ============================= NAV ============================= */
   const views = { home:'view-home', stats:'view-stats', manage:'view-manage' };
