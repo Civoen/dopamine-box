@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Dopamine Box</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0B0A12">
+<meta name="theme-color" content="#17181A">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,20 +16,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-0:#0B0A12;
-    --bg-1:#141220;
-    --bg-2:#1C1930;
-    --bg-card:#1A1729;
-    --line:#2A2640;
-    --ink:#F3F1FA;
-    --ink-dim:#9A93B8;
-    --ink-faint:#635C82;
-    --coral:#FF6B57;
-    --coral-dim:#7A362B;
-    --mint:#3FEFC2;
-    --gold:#FFC857;
-    --violet:#8E7CFF;
-    --danger:#FF5C7A;
+    --bg-0:#17181A;
+    --bg-1:#1F2022;
+    --bg-2:#292A2C;
+    --bg-card:#1D1E20;
+    --line:#34363A;
+    --ink:#F3F4F2;
+    --ink-dim:#9FA3A0;
+    --ink-faint:#6B6F6C;
+    --coral:#3ED873;
+    --coral-dim:#0F6B36;
+    --mint:#63F0B4;
+    --gold:#FFC94A;
+    --violet:#9B8CFF;
+    --danger:#FF6B5C;
     --font-display:'Space Grotesk', 'Inter', system-ui, sans-serif;
     --font-body:'Inter', system-ui, sans-serif;
     --radius-card:26px;
@@ -45,17 +45,17 @@
     overscroll-behavior:none;
   }
   html{
-    background: #08070D;
+    background: #0A0B0C;
   }
   body{
     margin:0;
     background:
-      radial-gradient(120% 60% at 50% -10%, #241E3D 0%, transparent 60%),
-      linear-gradient(180deg, var(--bg-0), #08070D 100%);
+      radial-gradient(120% 60% at 50% -10%, #232426 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg-0), #0A0B0C 100%);
     color:var(--ink);
     font-family:var(--font-body);
-    position:fixed;
-    inset:0;
+    display:flex;
+    flex-direction:column;
     overscroll-behavior:none;
   }
   @media (prefers-reduced-motion: reduce){
@@ -65,15 +65,20 @@
   input,textarea,select{font-family:inherit;}
   ::-webkit-scrollbar{display:none;}
 
+  /* #app is the flexible, scrollable middle region; #bottomnav is a normal
+     last-in-flow sibling below it — not position:fixed — so its position
+     is never at the mercy of iOS's fixed-positioning viewport quirks. */
   #app{
     max-width:480px;
     margin:0 auto;
-    height:100%;
+    width:100%;
+    flex:1;
+    min-height:0;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
     padding-top:calc(var(--safe-top) + 18px);
-    padding-bottom:calc(var(--safe-bottom) + 96px);
+    padding-bottom:18px;
     position:relative;
   }
 
@@ -105,8 +110,8 @@
     flex:1; background:var(--bg-card); border:1px solid var(--line); border-radius:20px;
     padding:14px 14px; position:relative; overflow:hidden;
   }
-  .stat-chip.flame{ background:linear-gradient(155deg, #2B1A1E 0%, var(--bg-card) 60%); }
-  .stat-chip.perfect{ background:linear-gradient(155deg, #2B2413 0%, var(--bg-card) 60%); }
+  .stat-chip.flame{ background:linear-gradient(155deg, #17301F 0%, var(--bg-card) 60%); }
+  .stat-chip.perfect{ background:linear-gradient(155deg, #302B15 0%, var(--bg-card) 60%); }
   .stat-chip .row{ display:flex; align-items:baseline; gap:7px;}
   .stat-chip .emoji{font-size:19px; line-height:1;}
   .stat-chip .num{ font-family:var(--font-display); font-size:26px; font-weight:700; }
@@ -134,7 +139,7 @@
   /* ---------- Section label ---------- */
   .grace-banner{
     margin:0 20px 6px; padding:12px 15px; border-radius:16px;
-    background:rgba(63,239,194,.10); border:1px solid rgba(63,239,194,.32);
+    background:rgba(99,240,180,.10); border:1px solid rgba(99,240,180,.32);
     color:var(--mint); font-size:12.5px; font-weight:600; line-height:1.4;
     display:flex; align-items:flex-start; gap:9px;
     animation:banner-in .4s cubic-bezier(.22,1,.36,1) both;
@@ -169,18 +174,18 @@
   .complete-btn{
     flex-shrink:0; border:none; cursor:pointer;
     width:54px; height:54px; border-radius:18px;
-    background:linear-gradient(155deg, var(--coral), #E14D3A);
-    box-shadow:0 6px 0 var(--coral-dim), 0 10px 18px -6px rgba(255,107,87,.5);
-    display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px;
+    background:linear-gradient(155deg, var(--coral), #1FA855);
+    box-shadow:0 6px 0 var(--coral-dim), 0 10px 20px -6px rgba(62,216,115,.5);
+    display:flex; align-items:center; justify-content:center; color:#08170E; font-size:22px;
     transition:transform .08s ease, box-shadow .08s ease, background .28s ease, color .28s ease;
   }
-  .complete-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 var(--coral-dim), 0 2px 6px -2px rgba(255,107,87,.5); }
+  .complete-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 var(--coral-dim), 0 2px 6px -2px rgba(62,216,115,.5); }
 
   .task-card.done{
     background:var(--bg-1);
     opacity:.55;
   }
-  .task-card.done .task-emoji{ background:rgba(63,239,194,.12); border-color:rgba(63,239,194,.3); }
+  .task-card.done .task-emoji{ background:rgba(99,240,180,.14); border-color:rgba(99,240,180,.32); }
   .task-card.done .task-name{ text-decoration:line-through; color:var(--ink-faint); }
   .task-card.done .complete-btn{
     background:var(--bg-2); box-shadow:none; color:var(--mint);
@@ -210,8 +215,12 @@
   .empty-state .cta{ margin-top:14px; display:inline-block; padding:10px 18px; border-radius:999px; background:var(--coral); color:#fff; font-weight:700; font-size:13px; border:none; cursor:pointer;}
 
   /* ---------- Bottom nav ---------- */
+  /* Normal flow, not position:fixed — it's the last child of body's flex
+     column, so it just sits after the scrollable area with no viewport
+     positioning ambiguity. z-index kept in case anything needs to layer
+     under it during transitions. */
   #bottomnav{
-    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    flex-shrink:0; z-index:40;
     display:flex; justify-content:center;
     padding:0 16px calc(var(--safe-bottom) + 10px);
   }
@@ -271,14 +280,14 @@
     width:42px;height:42px;border-radius:12px; background:var(--bg-2); border:1px solid var(--line);
     font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
-  .emoji-pick.sel{ border-color:var(--coral); background:rgba(255,107,87,.12); }
+  .emoji-pick.sel{ border-color:var(--coral); background:rgba(62,216,115,.14); }
   .toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 2px; border-bottom:1px solid var(--line); }
   .toggle-row:last-child{ border-bottom:none; }
   .toggle-row .t{ font-size:14.5px; font-weight:600; }
   .toggle-row .d{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
   .switch{ width:46px; height:27px; border-radius:999px; background:var(--bg-2); border:1px solid var(--line); position:relative; cursor:pointer; flex-shrink:0; }
   .switch .knob{ width:21px;height:21px; border-radius:50%; background:var(--ink-faint); position:absolute; top:2px; left:2px; transition:all .18s ease; }
-  .switch.on{ background:rgba(255,107,87,.35); border-color:var(--coral); }
+  .switch.on{ background:rgba(62,216,115,.35); border-color:var(--coral); }
   .switch.on .knob{ left:21px; background:var(--coral); }
 
   .pack-list{ display:flex; flex-direction:column; gap:8px; }
@@ -286,7 +295,7 @@
     display:flex; align-items:center; justify-content:space-between; padding:13px 15px;
     background:var(--bg-2); border:1px solid var(--line); border-radius:16px; cursor:pointer;
   }
-  .pack-row.sel{ border-color:var(--mint); background:rgba(63,239,194,.08); }
+  .pack-row.sel{ border-color:var(--mint); background:rgba(99,240,180,.10); }
   .pack-row.locked{ opacity:.5; }
   .pack-name{ font-weight:600; font-size:14px; }
   .pack-req{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
@@ -312,7 +321,7 @@
 
   /* ---------- Final celebration overlay ---------- */
   #celebrate{
-    position:fixed; inset:0; background:radial-gradient(120% 90% at 50% 20%, #26193A 0%, #0A0812 70%);
+    position:fixed; inset:0; background:radial-gradient(120% 90% at 50% 20%, #232426 0%, #0A0B0C 70%);
     z-index:100; display:flex; align-items:center; justify-content:center; flex-direction:column;
     opacity:0; pointer-events:none; transition:opacity .35s ease; text-align:center; padding:24px;
   }
@@ -854,7 +863,7 @@
     layer.style.pointerEvents='none'; layer.style.zIndex='55';
     document.body.appendChild(layer);
     const cx = rect.left + rect.width*0.86, cy = rect.top + rect.height*0.5;
-    const colors = ['#FF6B57','#3FEFC2','#FFC857','#8E7CFF'];
+    const colors = ['#3ED873','#63F0B4','#FFC94A','#9B8CFF'];
     for(let i=0;i<14;i++){
       const p = document.createElement('div');
       const size = 5 + Math.random()*5;
@@ -870,7 +879,7 @@
       p.animate([
         {transform:'translate(0,0) scale(1)', opacity:1},
         {transform:`translate(${dx}px, ${dy}px) scale(0.3)`, opacity:0}
-      ], {duration:600+Math.random()*300, easing:'cubic-bezier(.2,.8,.3,1)'});
+      ], {duration:600+Math.random()*300, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards'});
       layer.appendChild(p);
     }
     setTimeout(()=> layer.remove(), 1000);
@@ -1080,7 +1089,7 @@
     const c2 = canvas.getContext('2d');
     c2.setTransform(dpr,0,0,dpr,0,0);
     const W = canvas.clientWidth, H = canvas.clientHeight;
-    const colors = ['#FF6B57','#3FEFC2','#FFC857','#8E7CFF','#F3F1FA'];
+    const colors = ['#3ED873','#63F0B4','#FFC94A','#9B8CFF','#F3F4F2'];
     const particles = [];
     for(let i=0;i<90;i++){
       particles.push({
