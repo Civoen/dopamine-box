@@ -95,8 +95,9 @@
   @keyframes spin{to{transform:rotate(360deg);}}
 
   /* ---------- Header / Hero ---------- */
-  .hero{ padding:4px 20px 22px; }
+  .hero{ padding:4px 20px 10px; }
   .hero-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;}
+  #view-home .hero-top, #view-manage .hero-top{ margin-bottom:4px; }
   .brand{ font-family:var(--font-display); font-weight:600; font-size:17px; letter-spacing:.01em; color:var(--ink);}
   .brand small{display:block; font-size:10px; letter-spacing:.16em; color:var(--ink-faint); font-weight:500; margin-top:1px;}
   .icon-btn{
@@ -150,7 +151,26 @@
   .grace-icon{ font-size:15px; flex-shrink:0; line-height:1.3; }
   @keyframes banner-in{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
 
-  .section-label{ padding:22px 20px 10px; font-size:12.5px; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; display:flex; justify-content:space-between; align-items:center;}
+  .streak-reset-note{
+    margin:0 20px 6px; padding:12px 15px; border-radius:16px;
+    background:rgba(255,201,74,.10); border:1px solid rgba(255,201,74,.30);
+    color:var(--gold); font-size:12.5px; font-weight:600; line-height:1.4;
+    display:flex; align-items:flex-start; gap:9px;
+    animation:banner-in .4s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  .resting-state{
+    margin:0 20px 6px; padding:30px 20px 26px; border-radius:24px;
+    background:linear-gradient(155deg, rgba(62,216,115,.10) 0%, var(--bg-card) 65%);
+    border:1px solid rgba(62,216,115,.22);
+    text-align:center;
+    animation:banner-in .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  .resting-icon{ font-size:32px; margin-bottom:10px; }
+  .resting-title{ font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--ink); }
+  .resting-sub{ font-size:12.5px; color:var(--ink-dim); margin-top:5px; }
+
+  .section-label{ padding:10px 20px 10px; font-size:12.5px; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; display:flex; justify-content:space-between; align-items:center;}
   .section-label .add-btn{ color:var(--coral); font-weight:700; font-size:13px; background:none; border:none; cursor:pointer; }
 
   /* ---------- Task list ---------- */
@@ -196,8 +216,8 @@
   .task-card.editrow{ padding:12px 14px; }
   @keyframes card-in{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   .task-card.entrance{ animation:card-in .38s cubic-bezier(.22,1,.36,1) both; }
-  .task-manage-btns{ display:flex; gap:6px; flex-shrink:0; }
-  .mini-btn{ width:30px;height:30px;border-radius:9px;border:1px solid var(--line); background:var(--bg-1); color:var(--ink-dim); font-size:13px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .task-manage-btns{ display:flex; gap:8px; flex-shrink:0; }
+  .mini-btn{ width:40px;height:40px;border-radius:12px;border:1px solid var(--line); background:var(--bg-1); color:var(--ink-dim); font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
   .mini-btn.danger{ color:var(--danger); border-color:rgba(255,107,92,.35); background:rgba(255,107,92,.08); }
   .mini-btn.danger:active{ transform:scale(0.9); }
   .drag-handle{
@@ -388,14 +408,24 @@
       </div>
     </div>
 
+    <div class="streak-reset-note hidden" id="streak-reset-note">
+      <span class="grace-icon">🌱</span>
+      <span>Your streak reset. No worries. Every streak starts at 1, let's go again.</span>
+    </div>
+
     <div class="grace-banner hidden" id="grace-banner">
       <span class="grace-icon">❄️</span>
       <span>Grace day used this week. Don't miss today, no more forgiveness left.</span>
     </div>
 
+    <div class="resting-state hidden" id="resting-state">
+      <div class="resting-icon">🌙</div>
+      <div class="resting-title">Nothing left today</div>
+      <div class="resting-sub" id="resting-sub"></div>
+    </div>
+
     <div class="section-label">
       <span>TODAY'S TASKS</span>
-      <button class="add-btn" id="btn-add-task">+ Add task</button>
     </div>
 
     <div id="tasklist"></div>
@@ -596,6 +626,8 @@
       celebratedDates: {},      // dates for which we've already shown final celebration
       doneLabels: {},           // 'date:taskId' -> which quiet confirmation word was shown
       graceNotifiedWeek: null,  // ISO week key already shown the "grace protected you" flourish
+      lastSeenStreak: null,     // streak value observed last time the app was opened
+      streakResetNotified: false, // whether the current reset (0 after >0) has already been shown
     };
   }
 
@@ -1157,11 +1189,27 @@
     const todays = activeTasksForToday();
     const doneIds = completedIdsToday();
     const total = todays.length;
+    const allDone = total > 0 && doneIds.length === total;
 
     // grace-day banner: only worth flagging while there's a streak to protect
     const streakNow = computeStreakAndPerfect();
     const banner = document.getElementById('grace-banner');
     banner.classList.toggle('hidden', !(streakNow > 0 && graceUsedThisWeek()));
+
+    // one-time streak-reset note; clears itself once a new streak has begun
+    if(streakResetNoticeActive && streakNow > 0) streakResetNoticeActive = false;
+    document.getElementById('streak-reset-note').classList.toggle('hidden', !streakResetNoticeActive);
+
+    // resting state once every task for today is done
+    const resting = document.getElementById('resting-state');
+    resting.classList.toggle('hidden', !allDone);
+    if(allDone){
+      document.getElementById('resting-sub').textContent = streakNow > 0
+        ? `🔥 ${streakNow}-day streak kept alive`
+        : 'Nice work today.';
+    }
+    const labelEl = document.querySelector('#view-home .section-label span');
+    if(labelEl) labelEl.textContent = allDone ? 'COMPLETED' : "TODAY'S TASKS";
 
     const list = document.getElementById('tasklist');
     if(total===0){
@@ -1169,13 +1217,33 @@
       document.getElementById('empty-add').addEventListener('click', ()=> openTaskSheet(null));
       return;
     }
+
+    // capture current card positions before rebuilding, so completed tasks
+    // can glide down to the bottom (FLIP) instead of snapping there
+    const firstRects = new Map();
+    if(!animate){
+      list.querySelectorAll('.task-card[data-id]').forEach(el=>{
+        firstRects.set(el.dataset.id, el.getBoundingClientRect());
+      });
+    }
+
+    // incomplete tasks first (in their normal order), completed ones after
+    // (also by their normal order among themselves) — done work sinks down
+    // without being shuffled by completion time.
+    const sorted = todays.slice().sort((a,b)=>{
+      const aDone = doneIds.includes(a.id), bDone = doneIds.includes(b.id);
+      if(aDone !== bDone) return aDone ? 1 : -1;
+      return a.order - b.order;
+    });
+
     list.innerHTML = '';
     const t = todayStr();
-    todays.forEach((task, i)=>{
+    sorted.forEach((task, i)=>{
       const done = doneIds.includes(task.id);
       const label = done ? (state.doneLabels[`${t}:${task.id}`] || 'Done') : '';
       const card = document.createElement('div');
       card.className = 'task-card' + (done?' done':'') + (animate?' entrance':'');
+      card.dataset.id = task.id;
       if(animate) card.style.animationDelay = `${i*45}ms`;
       card.innerHTML = `
         <div class="task-emoji">${task.emoji||'✅'}</div>
@@ -1213,6 +1281,24 @@
       }
       list.appendChild(card);
     });
+
+    // FLIP: glide any card that changed position instead of letting it snap
+    if(!animate && firstRects.size){
+      list.querySelectorAll('.task-card[data-id]').forEach(el=>{
+        const first = firstRects.get(el.dataset.id);
+        if(!first) return; // newly added card, nothing to animate from
+        const last = el.getBoundingClientRect();
+        const dy = first.top - last.top;
+        if(Math.abs(dy) < 1) return;
+        el.style.transition = 'none';
+        el.style.transform = `translateY(${dy}px)`;
+        el.getBoundingClientRect(); // force reflow so the jump applies before animating away from it
+        requestAnimationFrame(()=>{
+          el.style.transition = 'transform 320ms cubic-bezier(.22,1,.36,1)';
+          el.style.transform = '';
+        });
+      });
+    }
   }
 
   function escapeHtml(s){
@@ -1486,7 +1572,6 @@
     renderHome(); renderManage();
   });
 
-  document.getElementById('btn-add-task').addEventListener('click', ()=> openTaskSheet(null));
   document.getElementById('btn-manage-add').addEventListener('click', ()=> openTaskSheet(null));
 
   /* ============================= SETTINGS SHEET ============================= */
@@ -1585,6 +1670,25 @@
   });
 
   /* ============================= INIT ============================= */
+  let streakResetNoticeActive = false;
+
+  // Compares today's streak against what we saw last time the app was
+  // opened. If it dropped from something to zero (and grace didn't cover
+  // it), that's a genuine reset — worth a gentle one-time note rather than
+  // just silently showing "0" with no acknowledgment of what happened.
+  function checkStreakReset(){
+    const streak = computeStreakAndPerfect();
+    if(state.lastSeenStreak !== null && state.lastSeenStreak > 0 && streak === 0 && !state.streakResetNotified){
+      state.streakResetNotified = true;
+      streakResetNoticeActive = true;
+    }
+    if(streak > 0){
+      state.streakResetNotified = false; // clear so a future reset can notify again
+    }
+    state.lastSeenStreak = streak;
+    saveState();
+  }
+
   function checkGraceFlourish(){
     const streak = computeStreakAndPerfect();
     if(streak === 0 || !graceUsedThisWeek()) return;
@@ -1609,6 +1713,7 @@
     await loadState();
     // keep longestStreak in sync on load
     state.longestStreak = Math.max(state.longestStreak, computeStreakAndPerfect());
+    checkStreakReset();
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('bottomnav').classList.remove('hidden');
